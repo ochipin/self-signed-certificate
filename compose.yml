@@ -1,0 +1,44 @@
+services:
+  # 自己署名証明書を作成するコンテナ. 以下コマンドを実行することで、自己署名証明書を作成できる
+  #   ex) docker compose run --rm -it openssl create-cert.sh
+  # 使用前に、"direnv"をインストールして設定しておくこと
+  openssl:
+    # docker compose --profile extra build
+    build:
+      context: .
+      dockerfile: Dockerfile
+      # args:
+        # - HTTP_PROXY=$http_proxy
+        # - HTTPS_PROXY=$https_proxy
+    # ホスト名
+    hostname: openssl
+    # イメージ
+    image: openssl:1.0
+    # コンテナ内で使用する環境変数
+    environment:
+      USER_ID: ${USER_ID}
+      GROUP_ID: ${GROUP_ID}
+      # 国
+      COUNTRY_NAME: JP
+      # 都道府県
+      STATE: Tokyo
+      # 町名
+      LOCALITY_NAME: 'Higashikurume'
+      # 会社名
+      ORGANIZATION_NAME: 'SampleInc.'
+      # 部署名
+      ORGANIZATION_UNIT: 'SampleInc.'
+      # ホスト名
+      COMMON_NAME: localhost
+      # 証明書の"days"
+      DAYS: 7300
+      # マルチドメイン証明書に必要な"alt_names"
+      ALT_NAMES: |
+        DNS.1 = localhost
+        DNS.2 = host.docker.internal
+        IP.3 = 127.0.0.1
+    volumes:
+      - ./openssl:/openssl
+    # 自己署名証明書は、最初の1回作成すればいいだけなので、 docker compose up で起動しないようにする
+    profiles:
+      - extra
